@@ -21,9 +21,9 @@ st.markdown("---")
 @st.cache_resource
 def load_model():
     model = joblib.load(os.path.join(BASE_DIR, 'calibrated_clf.pkl'))
-    le_grade = joblib.load(os.path.join(BASE_DIR, 'le_grade.pkl'))
-    le_default = joblib.load(os.path.join(BASE_DIR, 'le_default.pkl'))
-    ohe = joblib.load(os.path.join(BASE_DIR, 'ohe.pkl'))
+    le_grade = joblib.load(os.path.join(BASE_DIR, 'le_grade_encoder.pkl'))
+    le_default = joblib.load(os.path.join(BASE_DIR, 'le_default_encoder.pkl'))
+    ohe = joblib.load(os.path.join(BASE_DIR, 'ohe_encoder.pkl'))
     return model, le_grade, le_default, ohe
 
 try:
