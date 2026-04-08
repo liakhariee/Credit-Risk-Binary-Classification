@@ -5,6 +5,11 @@ import joblib
 import shap
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+import os
+import sys
+
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Настройка страницы
 st.set_page_config(page_title="Система кредитного скоринга", layout="wide")
@@ -15,10 +20,10 @@ st.markdown("---")
 # Загрузка модели
 @st.cache_resource
 def load_model():
-    model = joblib.load('calibrated_clf.pkl')
-    le_grade = joblib.load('le_grade.pkl')
-    le_default = joblib.load('le_default.pkl')
-    ohe = joblib.load('ohe.pkl')
+    model = joblib.load(os.path.join(BASE_DIR, 'calibrated_clf.pkl'))
+    le_grade = joblib.load(os.path.join(BASE_DIR, 'le_grade.pkl'))
+    le_default = joblib.load(os.path.join(BASE_DIR, 'le_default.pkl'))
+    ohe = joblib.load(os.path.join(BASE_DIR, 'ohe.pkl'))
     return model, le_grade, le_default, ohe
 
 try:
