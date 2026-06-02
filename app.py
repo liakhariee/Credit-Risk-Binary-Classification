@@ -104,9 +104,8 @@ if st.sidebar.button("Рассчитать риск", type="primary"):
         recommendation = "❌ Не рекомендуется одобрение"
     
     
-    col1, col2, col3 = st.columns(3)
+    col1, col3 = st.columns(3)
     col1.metric("Вероятность дефолта", f"{prob_percent:.2f}%")
-    col2.metric("Вероятность погашения", f"{100 - prob_percent:.2f}%")
     col3.markdown(f"### {risk_level}")
     
     st.info(recommendation)
