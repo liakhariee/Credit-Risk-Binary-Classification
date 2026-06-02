@@ -29,12 +29,12 @@ FEATURE_NAMES_RU = {
     'person_home_ownership_OWN': 'Собственность (без ипотеки)',
     'person_home_ownership_MORTGAGE': 'Ипотека',
     'person_home_ownership_OTHER': 'Другое владение',
-    'loan_intent_PERSONAL': 'Личные нужды',
-    'loan_intent_MEDICAL': 'Медицина',
-    'loan_intent_EDUCATION': 'Образование',
-    'loan_intent_VENTURE': 'Бизнес',
-    'loan_intent_HOMEIMPROVEMENT': 'Ремонт жилья',
-    'loan_intent_DEBTCONSOLIDATION': 'Консолидация долгов'
+    'loan_intent_PERSONAL': 'На личные нужды',
+    'loan_intent_MEDICAL': 'На медицину',
+    'loan_intent_EDUCATION': 'На образование',
+    'loan_intent_VENTURE': 'На бизнес',
+    'loan_intent_HOMEIMPROVEMENT': 'На ремонт жилья',
+    'loan_intent_DEBTCONSOLIDATION': 'На консолидацию долгов'
 }
 
 def get_russian_name(feature_name):
