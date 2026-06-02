@@ -8,12 +8,38 @@ from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 import os
 import sys
 
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 st.set_page_config(page_title="Система кредитного скоринга", layout="wide")
 st.title("Система прогнозирования кредитного риска")
 st.markdown("---")
+
+# Словарь соответствия английских и русских названий признаков
+FEATURE_NAMES_RU = {
+    'person_age': 'Возраст',
+    'person_income': 'Годовой доход',
+    'person_emp_length': 'Трудовой стаж',
+    'loan_amnt': 'Сумма кредита',
+    'loan_int_rate': 'Процентная ставка',
+    'loan_percent_income': 'Долговая нагрузка',
+    'cb_person_cred_hist_length': 'Длина кредитной истории',
+    'loan_grade_encoded': 'Кредитный рейтинг',
+    'cb_person_default_on_file_encoded': 'Дефолты в прошлом',
+    'person_home_ownership_RENT': 'Аренда жилья',
+    'person_home_ownership_OWN': 'Собственность (без ипотеки)',
+    'person_home_ownership_MORTGAGE': 'Ипотека',
+    'person_home_ownership_OTHER': 'Другое владение',
+    'loan_intent_PERSONAL': 'Личные нужды',
+    'loan_intent_MEDICAL': 'Медицина',
+    'loan_intent_EDUCATION': 'Образование',
+    'loan_intent_VENTURE': 'Бизнес',
+    'loan_intent_HOMEIMPROVEMENT': 'Ремонт жилья',
+    'loan_intent_DEBTCONSOLIDATION': 'Консолидация долгов'
+}
+
+def get_russian_name(feature_name):
+    """Получить русское название признака"""
+    return FEATURE_NAMES_RU.get(feature_name, feature_name)
 
 @st.cache_resource
 def load_model():
@@ -62,12 +88,12 @@ if st.sidebar.button("Рассчитать риск", type="primary"):
     
     client_df = pd.DataFrame(client_data)
     
-    
+    # Кодирование порядковых признаков
     client_df['loan_grade_encoded'] = le_grade.transform(client_df['loan_grade'])
     client_df['cb_person_default_on_file_encoded'] = le_default.transform(client_df['cb_person_default_on_file'])
     client_df = client_df.drop(columns=['loan_grade', 'cb_person_default_on_file'])
     
-    
+    # One-Hot Encoding
     ohe_features = ohe.transform(client_df[['person_home_ownership', 'loan_intent']])
     ohe_columns = ohe.get_feature_names_out(['person_home_ownership', 'loan_intent'])
     ohe_df = pd.DataFrame(ohe_features, columns=ohe_columns, index=client_df.index)
@@ -75,16 +101,15 @@ if st.sidebar.button("Рассчитать риск", type="primary"):
     client_df = pd.concat([client_df, ohe_df], axis=1)
     client_df = client_df.drop(columns=['person_home_ownership', 'loan_intent'])
     
-   
+    # Приведение к нужному порядку признаков
     client_processed = client_df[model.feature_names_in_]
     
-   
+    # Прогноз
     prob_defolt = model.predict_proba(client_processed)[0][1]
     prob_percent = prob_defolt * 100
     
-    
+    # Отображение результата
     st.header("📊 Результат прогнозирования")
-    
     
     if prob_percent < 10:
         risk_level = "🟢 Низкий риск"
@@ -103,39 +128,58 @@ if st.sidebar.button("Рассчитать риск", type="primary"):
         color = "darkred"
         recommendation = "❌ Не рекомендуется одобрение"
     
-    
-    col1, col3 = st.columns(3)
+    col1, col3 = st.columns(2)
     col1.metric("Вероятность дефолта", f"{prob_percent:.2f}%")
     col3.markdown(f"### {risk_level}")
     
     st.info(recommendation)
     
-    
     st.markdown("---")
-    st.header("Объяснение прогноза (SHAP)")
+    st.header("📈 Объяснение прогноза (SHAP)")
     
+    # Расчёт SHAP значений
     explainer = shap.Explainer(model.estimator)
     shap_values = explainer(client_processed)
     
-    
+    # 1. Влияние факторов на прогноз (водопадная диаграмма с русскими названиями)
     st.subheader("Влияние факторов на прогноз")
+    
+    # Создаём копию shap_values с русскими названиями
+    shap_values_ru = shap_values.copy()
+    feature_names_ru = [get_russian_name(name) for name in client_processed.columns]
+    shap_values_ru.feature_names = feature_names_ru
+    
+    # Отображаем водопадную диаграмму
     fig, ax = plt.subplots(figsize=(10, 6))
-    shap.plots.waterfall(shap_values[0], max_display=10, show=False)
+    shap.plots.waterfall(shap_values_ru[0], max_display=10, show=False)
+    plt.tight_layout()
     st.pyplot(fig)
     
-    
+    # 2. Топ-10 факторов риска с русскими названиями
     st.subheader("Топ-10 факторов риска")
+    
+    # Создаём DataFrame с английскими и русскими названиями
     shap_df = pd.DataFrame({
-        'Признак': client_processed.columns,
+        'Признак (EN)': client_processed.columns,
+        'Признак (RU)': [get_russian_name(name) for name in client_processed.columns],
         'SHAP_вклад': shap_values.values[0],
         'Значение': client_processed.iloc[0].values
     }).sort_values(by='SHAP_вклад', ascending=False).head(10)
     
+    # Добавляем влияние
+    shap_df['Влияние'] = shap_df['SHAP_вклад'].apply(
+        lambda x: '⬆️ Повышает риск' if x > 0 else '⬇️ Снижает риск'
+    )
     
-    shap_df['Влияние'] = shap_df['SHAP_вклад'].apply(lambda x: '⬆️ Повышает риск' if x > 0 else '⬇️ Снижает риск')
-    st.dataframe(shap_df, use_container_width=True)
+    # Отображаем таблицу (скрываем английский столбец, если нужно)
+    display_df = shap_df[['Признак (RU)', 'SHAP_вклад', 'Значение', 'Влияние']].copy()
+    display_df.columns = ['Признак', 'SHAP вклад', 'Значение', 'Влияние']
+    display_df['SHAP вклад'] = display_df['SHAP вклад'].round(4)
+    display_df['Значение'] = display_df['Значение'].round(2)
     
+    st.dataframe(display_df, use_container_width=True)
     
+    # 3. Рекомендации
     st.markdown("---")
     st.header("💡 Рекомендации")
     
@@ -154,7 +198,6 @@ if st.sidebar.button("Рассчитать риск", type="primary"):
         - Стандартная процентная ставка
         - Базовый мониторинг
         """)
-
 
 st.markdown("---")
 st.markdown("""
