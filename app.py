@@ -144,10 +144,16 @@ if st.sidebar.button("Рассчитать риск", type="primary"):
     # 1. Влияние факторов на прогноз (водопадная диаграмма с русскими названиями)
     st.subheader("Влияние факторов на прогноз")
     
-    # Создаём копию shap_values с русскими названиями
-    shap_values_ru = shap_values.copy()
+    # Формируем список русских названий
     feature_names_ru = [get_russian_name(name) for name in client_processed.columns]
-    shap_values_ru.feature_names = feature_names_ru
+    
+    # Создаем новый объект Explanation с русскими названиями признаков
+    shap_values_ru = shap.Explanation(
+        values=shap_values.values,
+        base_values=shap_values.base_values,
+        data=shap_values.data,
+        feature_names=feature_names_ru
+    )
     
     # Отображаем водопадную диаграмму
     fig, ax = plt.subplots(figsize=(10, 6))
