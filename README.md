@@ -17,9 +17,11 @@ SHAP интерпретация.
 - Brier Score: 0.0544
 
 Dataset - https://www.kaggle.com/datasets/laotse/credit-risk-dataset/data
-Streamlit App - https://credit-risk-binary-classification-ckdrnazwapjafczxkzwjd2.streamlit.app/
 
 ## Использование
+
+Streamlit App - https://credit-risk-binary-classification-ckdrnazwapjafczxkzwjd2.streamlit.app/
+
 1. Откройте streamlit app
 2. Введите параметры заёмщика в боковой панели
 3. Нажмите "Рассчитать риск"
