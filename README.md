@@ -35,4 +35,5 @@ Streamlit App - https://credit-risk-binary-classification-ckdrnazwapjafczxkzwjd2
 3. Нажмите "Рассчитать риск"
 4. Получите прогноз вероятности дефолта и рекомендации
 
+<img width="1906" height="878" alt="изображение" src="https://github.com/user-attachments/assets/e7f1aa46-5577-43e9-9b13-714ffb37dd64" />
 
